@@ -39,7 +39,7 @@ public:
     void set_is_word(bool is_word) { _is_word = is_word; }
     Node* child(char c) const;
     void set_child(std::shared_ptr<Node>&& node, char c) { _children.insert({c, std::move(node)}); }
-    Node* InsertChildWord(char c);
+    Node* InsertChildWord(char c); 
     void InsertChildLetter(char c);
     void Serialize(std::ofstream& stream);
 
@@ -71,7 +71,7 @@ class Trie
 public:
     Trie();
     Node* GetRootRaw() { return _root.get(); }
-    Node* AddWordToTrie(const std::string& word, unsigned short fileID);
+    Node* AddWordToTrie(const std::string& word);
     void SearchInTrie(std::string preFix, std::vector<std::string>& wordsFound);
     void DepthFirstSearch(Node* startNodePtr, std::vector<std::string>& wordsFound);
     std::pair<Node*, std::string> SearchSubString(Node* startNode, std::string fix, std::string word);

@@ -27,7 +27,7 @@ Generator<std::string> autoComplete(Node* startNode, std::string word)
             std::string wordPlus = letters + c;
             if (childPtr != nullptr) {
                 queue.push_back(std::make_pair(childPtr, wordPlus));
-                if (!childPtr->appearances().empty()) {
+                if (childPtr->is_word()) {
                     co_yield wordPlus;
                 } 
             } 

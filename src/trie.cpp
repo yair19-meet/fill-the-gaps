@@ -9,15 +9,15 @@
 #include <random>
 #include <thread>
 
-#include <arpa/inet.h>
+#include <winsock2.h>
 
 #include "generation.h"
 
 inline constexpr std::string_view kAlphabet = "abcdefghijklmnopqrstuvwxyz";
 
 
-// Initializing the Counter
-std::atomic<uint32_t> Node::_WordCounter = 0;
+// // Initializing the Counter
+// std::atomic<uint32_t> Node::_WordCounter = 0;
 
 // Constructor for creating a Node which is a part of a path to a word
 Node::Node(char letter, bool is_word) : _letter(letter), _is_word(is_word) {}
@@ -30,32 +30,32 @@ Node* Node::child(char c) const {
     return _children.at(c).get();
 }
 
-unsigned short Node::GetLastAppearance() const
-{
-    if (_appearances.empty()) {
-        throw std::runtime_error("No appearances available");
-    }
-    return _appearances.back();
-}
+// unsigned short Node::GetLastAppearance() const
+// {
+//     if (_appearances.empty()) {
+//         throw std::runtime_error("No appearances available");
+//     }
+//     return _appearances.back();
+// }
 
 
-void Node::Serialize(std::ofstream& stream)
-{
-    uint16_t size = htons(static_cast<uint16_t>(_appearances.size()));
-    stream.write(reinterpret_cast<const char*>(&size), sizeof(size));
+// void Node::Serialize(std::ofstream& stream)
+// {
+//     uint16_t size = htons(static_cast<uint16_t>(_appearances.size()));
+//     stream.write(reinterpret_cast<const char*>(&size), sizeof(size));
 
-    for (auto& fileID : _appearances)
-    {
-       uint16_t fID = htons(fileID);
-        stream.write(reinterpret_cast<const char*>(&fID), sizeof(fID));       
-    }
+//     for (auto& fileID : _appearances)
+//     {
+//        uint16_t fID = htons(fileID);
+//         stream.write(reinterpret_cast<const char*>(&fID), sizeof(fID));       
+//     }
     
-    for (char c : word_finder::kAlphabet)
-    {
-        char flag = (child(c) == nullptr) ? 0 : 1;
-        stream.write(&flag, sizeof(flag));
-    }
-}
+//     for (char c : kAlphabet)
+//     {
+//         char flag = (child(c) == nullptr) ? 0 : 1;
+//         stream.write(&flag, sizeof(flag));
+//     }
+// }
 
 
 
@@ -75,7 +75,7 @@ but it is a part of a longer path and does not represent a word,
  A lock_guard is used in order to ensure that there are no multiple threads
  modifying the same Node object at once.
 */
-Node* Node::InsertChildWord(char c, bool is_word) 
+Node* Node::InsertChildWord(char c) 
 { 
     std::lock_guard<std::mutex> lck(_mtx);
     if (this->child(c) == nullptr) {
@@ -83,7 +83,7 @@ Node* Node::InsertChildWord(char c, bool is_word)
         this->set_child(std::move(newWordNode), c); 
         return this->child(c);
     } else {
-        if (this->child(c)->appearances().empty()) {
+        if (this->child(c)->is_word() == false) {
             this->child(c)->set_is_word(true);
             return this->child(c);
         }  
@@ -113,7 +113,7 @@ Trie::Trie() : _root(std::make_unique<Node>('*')) {}
 
 
 // Function for creating a path to a word in trie
-Node* Trie::AddWordToTrie(const std::string& word, unsigned short fileID)
+Node* Trie::AddWordToTrie(const std::string& word)
 {
     Node* nodePtr = _root.get();
     for (int i = 0; i < word.length() - 1; ++i)
@@ -137,18 +137,7 @@ Node* Trie::AddWordToTrie(const std::string& word, unsigned short fileID)
     return node;
 }
 
-// Node* Trie::AddSynonym(std::string& synonym)
-// {
-//     Node* nodePtr = _root.get();
-//     for (int i = 0; i < synonym.length(); ++i)
-//     {
-//         char c = synonym[i];
-//         nodePtr->InsertChildLetter(c);
-//         nodePtr = nodePtr->child(c);
-//     }
-//     nodePtr->set_word(synonym);
-//     return nodePtr;
-// }
+
 
 
 /* 
@@ -211,10 +200,10 @@ Generator<std::pair<Node*, std::string>> Trie::SearchSuffixRoutine(Node* startNo
         Node* nodePtr = values.first;
         std::string fullWord = values.second;
 
-        if (nodePtr != nullptr && !nodePtr->appearances().empty()) {
+        if (nodePtr != nullptr && nodePtr->is_word()) {
             co_yield std::make_pair(nodePtr, fullWord);
         }
-        for (char c : word_finder::kAlphabet)
+        for (char c : kAlphabet)
         {
             Node* childPtr = currentPtr->child(c);
             std::string wordPlus = letters + c;
@@ -261,7 +250,7 @@ Generator<std::pair<Node*, std::string>> Trie::SearchDoubleFixRoutine(Node* star
         {
             co_yield gen.getValue();
         }
-        for (char c : word_finder::kAlphabet)
+        for (char c : kAlphabet)
         {
             Node* childPtr = currentPtr->child(c);
             std::string wordPlus = letters + c;

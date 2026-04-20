@@ -9,10 +9,6 @@
 #include <mutex>
 #include <random>
 
-#include <tesseract/baseapi.h>
-#include <leptonica/allheaders.h>
-
-#include "bktree.h"
 #include "trie.h"
 
 
@@ -30,7 +26,6 @@ class Operation
 {
 public:
     Operation();
-    ~Operation();
     Trie& trie() { return _trie; }
     Trie& suffix_trie() { return _suffixTrie; }
     void LookUpInTrie(std::string preFix, std::vector<std::string>& wordsFound);
@@ -39,6 +34,8 @@ public:
     void Serialize(std::filesystem::path directory);
     void LoadData(std::filesystem::path directory);
     std::vector<std::string> GenerateBrokenWord();
+    void LoadDictionary(const std::string& filepath);
+    bool checkWordValidity(const std::string& userWord, const std::vector<std::string>& brokenWord);
 
 private:
     void WriteTrie(std::filesystem::path filePath, Trie& trie);
