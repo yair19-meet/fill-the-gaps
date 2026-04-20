@@ -36,20 +36,10 @@ Operation::Operation()
 
 inline constexpr std::string_view kAlphabet = "abcdefghijklmnopqrstuvwxyz";
 
-std::vector<std::string> Operation::GenerateBrokenWord()
+
+std::string Operation::GenerateAWord()
 {
-
-    // distributions for choosing interval
-    std::uniform_int_distribution<> distrFirstInterval(0, 3); 
-    std::uniform_int_distribution<> distrNormalInterval(1, 4);
-    std::uniform_int_distribution<> distrGap(1, 3);
-
-    // here we save the "broken" word as parts seperated by implicit wild cards.
-    std::vector<std::string> wordParts;
-
-    // we ran the algorithm until we get a valid solution
-    bool found_solution = false;
-
+    std::uniform_real_distribution<double> distr(0.0, 1.0);
 
     auto get_random_child = [&](Node* current_node) -> Node* {
         std::vector<char> validLetters;
@@ -68,83 +58,177 @@ std::vector<std::string> Operation::GenerateBrokenWord()
         return current_node->child(chosenLetter);
     };
 
-
+  
+    std::string word;
+    bool found_solution = false;
     while (!found_solution) {
-        wordParts = {};
-        bool reached_dead_end = false;
-        int num_of_stars = 0;
+        word = "";
         Node* node = _trie.GetRootRaw();
-
-        bool isFirstInterval = true;
-
-        while (!reached_dead_end) {
-            std::string currentPart = "";
-            int intervalLength;
-            bool shouldEnd = false;
-            if (isFirstInterval) {
-                intervalLength = distrFirstInterval(_gen);
-                isFirstInterval = false; 
-            } else if (num_of_stars == 2) {
-                shouldEnd = true;
-                intervalLength = distrNormalInterval(_gen);
-            }
-            else {
-                intervalLength = distrNormalInterval(_gen);
-            }
-            if (shouldEnd) {
-                for (int i = 0; i < intervalLength; ++i) {
-                    Node* nextNode = get_random_child(node);
-                    if (!nextNode) {
-                        reached_dead_end = true;
-                        break;
-                    }
-                    node = nextNode;
-                    currentPart += node->letter();
-                    if (node->is_word()) {
-                        reached_dead_end = true;
-                        break;
-                    }
+        float threshold = 1.0f;
+        while (node) {
+            Node* childNode = get_random_child(node);
+            if (!childNode) {
+                if (word.length() >= 6 && node->is_word()) {
+                    found_solution = true;
                 }
+                break;
             } else {
-                for (int i = 0; i < intervalLength; ++i) {
-                    Node* nextNode = get_random_child(node);
-                    if (!nextNode) {
-                        reached_dead_end = true;
-                        break;
-                    }
-                    node = nextNode;
-                    currentPart += node->letter();
-                }
+                node = childNode;
+                word += node->letter();  
             }
-
-            wordParts.push_back(currentPart);
-
-            if (reached_dead_end) {
-                if (num_of_stars == 2 && node->is_word()) {
+            if (node->is_word()) {
+                if (word.length() >= 6 && threshold < distr(_gen)) {
                     found_solution = true;
                     break;
                 }
-            } 
-            else {
-                int gapLength = distrGap(_gen);
-                for (int k = 0; k < gapLength; ++k) {
-                    Node* nextNode = get_random_child(node);
-                    if (!nextNode) {
-                        reached_dead_end = true;
-                        if (num_of_stars == 1 && node->is_word() && k > 0) {
-                            found_solution = true; 
-                        }
-                        break;
-                    }
-                    node = nextNode;
-                }
-                num_of_stars += 1; 
             }
-        }
+            threshold *= 0.85f;
+        } 
+    } 
+
+    return word;
+}
+
+
+#include <numeric> 
+#include <algorithm> 
+ 
+std::vector<std::string> Operation::BreakWord(const std::string& word)
+{
+    int length = word.length();
+    std::vector<std::string> wordParts;
+
+    if (length <= 4) {
+        wordParts.push_back(word); 
+        return wordParts;
     }
+
+    std::vector<int> cutPoints(length - 1);
+    std::iota(cutPoints.begin(), cutPoints.end(), 1); 
+
+    std::shuffle(cutPoints.begin(), cutPoints.end(), _gen);
+    cutPoints.resize(4);
+
+    std::sort(cutPoints.begin(), cutPoints.end());
+    int s1 = cutPoints[0];
+    int s2 = cutPoints[1];
+    int s3 = cutPoints[2];
+    int s4 = cutPoints[3];
+
+    wordParts.push_back(word.substr(0, s1)); 
+    wordParts.push_back(word.substr(s2, s3 - s2));    
+    wordParts.push_back(word.substr(s4));             
 
     return wordParts;
 }
+
+std::vector<std::string> Operation::GenerateBrokenWord()
+{
+    return BreakWord(GenerateAWord());
+}
+
+// std::vector<std::string> Operation::GenerateBrokenWord()
+// {
+
+//     // distributions for choosing interval 
+//     std::uniform_int_distribution<> distrNormalInterval(1, 4);
+//     std::uniform_int_distribution<> distrGap(1, 3);
+
+//     // here we save the "broken" word as parts seperated by implicit wild cards.
+//     std::vector<std::string> wordParts;
+
+//     // we ran the algorithm until we get a valid solution
+//     bool found_solution = false;
+
+
+//     auto get_random_child = [&](Node* current_node) -> Node* {
+//         std::vector<char> validLetters;
+//         for (int j = 0; j < 26; ++j) { // Using 'j' to avoid shadowing
+//             if (current_node->child(kAlphabet[j]) != nullptr) {
+//                 validLetters.push_back(kAlphabet[j]);
+//             }
+//         }
+        
+//         if (validLetters.empty()) {
+//             return nullptr;
+//         }
+        
+//         std::uniform_int_distribution<> childDist(0, validLetters.size() - 1);
+//         char chosenLetter = validLetters[childDist(_gen)];
+//         return current_node->child(chosenLetter);
+//     };
+
+
+//     while (!found_solution) {
+//         wordParts = {};
+//         bool reached_dead_end = false;
+//         int num_of_stars = 0;
+//         Node* node = _trie.GetRootRaw();
+
+//         while (!reached_dead_end) {
+//             std::string currentPart = "";
+//             int intervalLength;
+//             bool shouldEnd = false; 
+//             if (num_of_stars == 2) {
+//                 shouldEnd = true;
+//                 intervalLength = distrNormalInterval(_gen);
+//             } else {
+//                 intervalLength = distrNormalInterval(_gen);
+//             }
+//             if (shouldEnd) {
+//                 for (int i = 0; i < intervalLength; ++i) {
+//                     Node* nextNode = get_random_child(node);
+//                     if (!nextNode) {
+//                         reached_dead_end = true;
+//                         break;
+//                     }
+//                     node = nextNode;
+//                     currentPart += node->letter();
+//                     if (node->is_word()) {
+//                         reached_dead_end = true;
+//                         break;
+//                     }
+//                 }
+//             } else {
+//                 for (int i = 0; i < intervalLength; ++i) {
+//                     Node* nextNode = get_random_child(node);
+//                     if (!nextNode) {
+//                         reached_dead_end = true;
+//                         break;
+//                     }
+//                     node = nextNode;
+//                     currentPart += node->letter();
+//                 }
+//             }
+
+//             wordParts.push_back(currentPart);
+
+//             if (reached_dead_end) {
+//                 if (num_of_stars == 2 && node->is_word()) {
+//                     found_solution = true;
+//                     break;
+//                 }
+//             } 
+//             else {
+//                 int gapLength = distrGap(_gen);
+//                 for (int k = 0; k < gapLength; ++k) {
+//                     Node* nextNode = get_random_child(node);
+//                     if (!nextNode) {
+//                         reached_dead_end = true;
+//                         if (num_of_stars == 1 && node->is_word() && k > 0) {
+//                             found_solution = true; 
+//                         }
+//                         break;
+//                     }
+//                     node = nextNode;
+//                 }
+//                 num_of_stars += 1; 
+//             }
+//         }
+//     }
+
+//     return wordParts;
+// }
 
 
 bool Operation::checkWordValidity(const std::string& userWord, const std::vector<std::string>& brokenWord)
@@ -166,6 +250,21 @@ bool Operation::checkWordValidity(const std::string& userWord, const std::vector
     return false;
 }
 
+
+std::string Operation::fullWord(const std::vector<std::string>& brokenWord)
+{
+    Generator<std::pair<Node*, std::string>> gen =  _trie.SearchPreMidSuffixesRoutine(_trie.GetRootRaw(), brokenWord[0], brokenWord[1], brokenWord[2]);
+    while (gen.next())
+    {
+        std::pair<Node*, std::string> values = gen.getValue();
+        Node* nodePtr = values.first;
+        std::string word = values.second;
+        if (nodePtr != nullptr && nodePtr->is_word()) { 
+            return word;                            
+        }
+    }
+    return "";
+}
 
 
 

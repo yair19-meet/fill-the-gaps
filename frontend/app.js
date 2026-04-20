@@ -31,7 +31,7 @@ function showScreen(screenElement) {
     screenElement.classList.add('active');
 }
 
-async function startGame() {
+async function startGame(e) {
     score = 0;
     timeLeft = 120;
     updateScore();
@@ -91,10 +91,10 @@ async function checkWordWithBackend(guess, brokenWord) {
         const brokenParam = brokenWord.join(',');
         const res = await fetch(`/api/check?guess=${encodeURIComponent(guess)}&broken=${encodeURIComponent(brokenParam)}`);
         const data = await res.json();
-        return data.valid;
+        return data;
     } catch (err) {
         console.error("Error checking word:", err);
-        return false;
+        return { valid: false };
     }
 }
 
@@ -129,8 +129,8 @@ function renderWord(brokenWordParts) {
     });
 }
 
-function showFeedback(isSuccess) {
-    feedbackMessage.textContent = isSuccess ? 'WELL DONE!' : 'INCORRECT';
+function showFeedback(isSuccess, correctWord = '') {
+    feedbackMessage.textContent = isSuccess ? 'WELL DONE!' : `INCORRECT. The word was: ${correctWord}`;
     feedbackMessage.className = `feedback-message ${isSuccess ? 'feedback-success' : 'feedback-error'}`;
 
     setTimeout(() => {
@@ -146,22 +146,25 @@ async function handleGuess(e) {
     // Disable input while checking
     wordInput.disabled = true;
 
-    const isValid = await checkWordWithBackend(guess, currentBrokenWord);
+    const result = await checkWordWithBackend(guess, currentBrokenWord);
 
-    wordInput.disabled = false;
-    wordInput.focus();
-
-    if (isValid) {
+    if (result.valid) {
+        wordInput.disabled = false;
+        wordInput.focus();
         score++;
         updateScore();
         showFeedback(true);
         // Add a nice pop effect to the score
         scoreDisplay.parentElement.style.transform = 'scale(1.3)';
         setTimeout(() => scoreDisplay.parentElement.style.transform = 'scale(1)', 200);
-        
+
         await nextWord();
     } else {
-        showFeedback(false);
-        await nextWord();
+        showFeedback(false, result.correctWord || '');
+        setTimeout(async () => {
+            wordInput.disabled = false;
+            wordInput.focus();
+            await nextWord();
+        }, 1500);
     }
 }

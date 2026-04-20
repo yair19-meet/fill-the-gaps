@@ -35,11 +35,10 @@ std::string toJsonArray(const std::vector<std::string>& vec) {
 int main() {
     Operation gameEngine;
     
-    std::cout << "Loading dictionary..." << std::endl;
-    gameEngine.LoadDictionary("../data/politics.txt"); 
-    std::cout << "Dictionary loaded." << std::endl;
-
     httplib::Server svr;
+    
+    // Load the global dictionary
+    gameEngine.LoadDictionary("../data/full_vocab.txt");
 
     svr.set_mount_point("/", "../frontend");
 
@@ -62,7 +61,13 @@ int main() {
         std::vector<std::string> brokenWord = splitString(brokenStr, ',');
 
         bool valid = gameEngine.checkWordValidity(guess, brokenWord);
-        std::string jsonStr = valid ? "{\"valid\": true}" : "{\"valid\": false}";
+        std::string jsonStr;
+        if (valid) {
+            jsonStr = "{\"valid\": true}";
+        } else {
+            std::string correctWord = gameEngine.fullWord(brokenWord);
+            jsonStr = "{\"valid\": false, \"correctWord\": \"" + correctWord + "\"}";
+        }
         res.set_content(jsonStr, "application/json");
         res.set_header("Access-Control-Allow-Origin", "*");
     });

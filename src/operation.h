@@ -33,9 +33,12 @@ public:
     void ReloadTrie(); 
     void Serialize(std::filesystem::path directory);
     void LoadData(std::filesystem::path directory);
+    std::string GenerateAWord();
+    std::vector<std::string> BreakWord(const std::string& word);
     std::vector<std::string> GenerateBrokenWord();
     void LoadDictionary(const std::string& filepath);
     bool checkWordValidity(const std::string& userWord, const std::vector<std::string>& brokenWord);
+    std::string fullWord(const std::vector<std::string>& brokenWord);
 
 private:
     void WriteTrie(std::filesystem::path filePath, Trie& trie);
