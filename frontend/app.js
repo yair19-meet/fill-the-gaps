@@ -19,11 +19,38 @@ const wordDisplay = document.getElementById('word-display');
 const guessForm = document.getElementById('guess-form');
 const wordInput = document.getElementById('word-input');
 const feedbackMessage = document.getElementById('feedback-message');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const sidebar = document.getElementById('sidebar');
+const themeCheckboxes = document.querySelectorAll('input[name="theme"]');
 
 // Event Listeners
 btnStart.addEventListener('click', startGame);
 btnRestart.addEventListener('click', startGame);
 guessForm.addEventListener('submit', handleGuess);
+
+// Sidebar Toggle
+sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+});
+
+// Interactive Theme Selection
+themeCheckboxes.forEach(cb => {
+    cb.addEventListener('change', async () => {
+        const selectedThemes = Array.from(document.querySelectorAll('input[name="theme"]:checked')).map(cb => cb.value);
+        if (selectedThemes.length === 0) {
+            // Prevent unchecking all
+            cb.checked = true;
+            return;
+        }
+        // Immediately set themes on the backend
+        try {
+            const themesParam = selectedThemes.join(',');
+            await fetch(`/api/set_themes?themes=${themesParam}`);
+        } catch (err) {
+            console.error("Error setting themes dynamically:", err);
+        }
+    });
+});
 
 // Functions
 function showScreen(screenElement) {
@@ -32,6 +59,20 @@ function showScreen(screenElement) {
 }
 
 async function startGame(e) {
+    const selectedThemes = Array.from(document.querySelectorAll('input[name="theme"]:checked')).map(cb => cb.value);
+    if (selectedThemes.length === 0) {
+        alert('Please select at least one theme!');
+        return;
+    }
+
+    // Set themes on the backend
+    try {
+        const themesParam = selectedThemes.join(',');
+        await fetch(`/api/set_themes?themes=${themesParam}`);
+    } catch (err) {
+        console.error("Error setting themes:", err);
+    }
+
     score = 0;
     timeLeft = 120;
     updateScore();

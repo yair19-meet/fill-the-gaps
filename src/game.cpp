@@ -33,17 +33,36 @@ std::string toJsonArray(const std::vector<std::string>& vec) {
 }
 
 int main() {
-    Operation gameEngine;
+    std::unique_ptr<Operation> gameEngine = std::make_unique<Operation>();
     
     httplib::Server svr;
     
-    // Load the global dictionary
-    gameEngine.LoadDictionary("../data/full_vocab.txt");
+    // We'll load the dictionary later when the frontend sets the theme
+    // gameEngine->LoadDictionary("../data/politics_words_new.txt");
 
     svr.set_mount_point("/", "../frontend");
 
+    svr.Get("/api/set_themes", [&](const httplib::Request& req, httplib::Response& res) {
+        if (!req.has_param("themes")) {
+            res.status = 400;
+            res.set_content("{\"error\": \"Missing themes param\"}", "application/json");
+            return;
+        }
+        std::string themes = req.get_param_value("themes");
+        
+        // Reset the engine to clear the trie
+        gameEngine = std::make_unique<Operation>();
+        
+        if (themes.find("politics") != std::string::npos) {
+            gameEngine->LoadDictionary("../data/politics_words_new.txt");
+        }
+        
+        res.set_content("{\"status\": \"ok\"}", "application/json");
+        res.set_header("Access-Control-Allow-Origin", "*");
+    });
+
     svr.Get("/api/generate", [&](const httplib::Request& req, httplib::Response& res) {
-        std::vector<std::string> brokenWord = gameEngine.GenerateBrokenWord();
+        std::vector<std::string> brokenWord = gameEngine->GenerateBrokenWord();
         std::string jsonStr = "{\"brokenWord\": " + toJsonArray(brokenWord) + "}";
         res.set_content(jsonStr, "application/json");
         res.set_header("Access-Control-Allow-Origin", "*");
@@ -60,14 +79,17 @@ int main() {
         std::string brokenStr = req.get_param_value("broken");
         std::vector<std::string> brokenWord = splitString(brokenStr, ',');
 
-        bool valid = gameEngine.checkWordValidity(guess, brokenWord);
+        std::pair<bool, std::vector<std::string>> result = gameEngine->checkWordValidity(guess, brokenWord);
+        bool valid = result.first;
+        std::vector<std::string> wordsFound = result.second;
         std::string jsonStr;
         if (valid) {
             jsonStr = "{\"valid\": true}";
         } else {
-            std::string correctWord = gameEngine.fullWord(brokenWord);
+            std::uniform_int_distribution<> distr(0, wordsFound.size() - 1);
+            std::string correctWord = wordsFound[distr(gameEngine->GetRand())];
             jsonStr = "{\"valid\": false, \"correctWord\": \"" + correctWord + "\"}";
-        }
+        } 
         res.set_content(jsonStr, "application/json");
         res.set_header("Access-Control-Allow-Origin", "*");
     });

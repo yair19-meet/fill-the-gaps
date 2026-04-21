@@ -10,63 +10,107 @@
 </head>
 
 <body>
-    <div class="background-elements">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-2"></div>
-        <div class="glow-orb orb-3"></div>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <button class="toggle-btn" id="sidebar-toggle" aria-label="Toggle Sidebar">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-collapse"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-expand"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            
+            <div class="sidebar-content">
+                <h2 class="sidebar-title">Themes</h2>
+                <div class="theme-list">
+                    <label class="theme-item">
+                        <input type="checkbox" name="theme" value="politics" checked>
+                        <span class="custom-checkbox">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </span>
+                        <span class="theme-name">Politics</span>
+                    </label>
+                    <label class="theme-item">
+                        <input type="checkbox" name="theme" value="history">
+                        <span class="custom-checkbox">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </span>
+                        <span class="theme-name">History</span>
+                    </label>
+                    <label class="theme-item">
+                        <input type="checkbox" name="theme" value="food">
+                        <span class="custom-checkbox">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </span>
+                        <span class="theme-name">Food</span>
+                    </label>
+                    <label class="theme-item">
+                        <input type="checkbox" name="theme" value="pop">
+                        <span class="custom-checkbox">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </span>
+                        <span class="theme-name">Pop</span>
+                    </label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="main-title">Fill The Gaps</h1>
+            
+            <div class="screens-container" id="app-container">
+                <!-- Landing Screen -->
+                <section id="screen-landing" class="screen active">
+                    <p class="subtitle">Can you guess the word before time runs out?</p>
+                    <button id="btn-start" class="btn-primary">START GAME</button>
+                </section>
+
+                <!-- Gameplay Screen -->
+                <section id="screen-gameplay" class="screen">
+                    <header class="game-header">
+                        <div class="timer-box">
+                            <span class="icon">⏱</span> <span id="timer">120</span>s
+                        </div>
+                        <div class="score-box">
+                            <span class="icon">⭐</span> <span id="score">0</span>
+                        </div>
+                    </header>
+
+                    <div class="game-board">
+                        <div class="word-circle">
+                            <div id="word-display" class="word-display">
+                                <!-- Letters will be injected here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-area">
+                        <form id="guess-form" autocomplete="off">
+                            <div class="pill-input-container">
+                                <span class="input-prefix">&gt;</span>
+                                <input type="text" id="word-input" class="word-input" placeholder="...." autofocus>
+                            </div>
+                            <button type="submit" class="hidden-submit" style="display: none;">Submit</button>
+                        </form>
+                    </div>
+
+                    <div id="feedback-message" class="feedback-message"></div>
+                </section>
+
+                <!-- Game Over Screen -->
+                <section id="screen-gameover" class="screen">
+                    <h2 class="main-title" style="color: var(--accent-main); font-size: 2.5rem;">TIME'S UP!</h2>
+                    <div class="final-score">
+                        <p>You scored</p>
+                        <div class="score-circle">
+                            <span id="final-score-value">0</span>
+                        </div>
+                        <p>points</p>
+                    </div>
+                    <button id="btn-restart" class="btn-primary">PLAY AGAIN</button>
+                </section>
+            </div>
+        </main>
     </div>
-
-    <main class="glass-panel" id="app-container">
-        <!-- Landing Screen -->
-        <section id="screen-landing" class="screen active">
-            <h1 class="title">FILL THE <span class="text-orange">GAPS</span></h1>
-            <p class="subtitle">Can you guess the word before time runs out?</p>
-
-
-
-            <button id="btn-start" class="btn-primary">START GAME</button>
-        </section>
-
-        <!-- Gameplay Screen -->
-        <section id="screen-gameplay" class="screen">
-            <header class="game-header">
-                <div class="timer-box">
-                    <span class="icon">⏱</span> <span id="timer">120</span>s
-                </div>
-                <div class="score-box">
-                    <span class="icon">⭐</span> <span id="score">0</span>
-                </div>
-            </header>
-
-            <div class="game-board">
-                <div id="word-display" class="word-display">
-                    <!-- Letters will be injected here -->
-                </div>
-            </div>
-
-            <div class="input-area">
-                <form id="guess-form" autocomplete="off">
-                    <input type="text" id="word-input" class="word-input" placeholder="Type the full word..." autofocus>
-                    <button type="submit" class="btn-secondary">Submit</button>
-                </form>
-            </div>
-
-            <div id="feedback-message" class="feedback-message"></div>
-        </section>
-
-        <!-- Game Over Screen -->
-        <section id="screen-gameover" class="screen">
-            <h2 class="title text-orange">TIME'S UP!</h2>
-            <div class="final-score">
-                <p>You scored</p>
-                <div class="score-circle">
-                    <span id="final-score-value">0</span>
-                </div>
-                <p>points</p>
-            </div>
-            <button id="btn-restart" class="btn-primary">PLAY AGAIN</button>
-        </section>
-    </main>
 
     <script src="app.js"></script>
 </body>

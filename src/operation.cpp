@@ -231,7 +231,7 @@ std::vector<std::string> Operation::GenerateBrokenWord()
 // }
 
 
-bool Operation::checkWordValidity(const std::string& userWord, const std::vector<std::string>& brokenWord)
+std::pair<bool, std::vector<std::string>> Operation::checkWordValidity(const std::string& userWord, const std::vector<std::string>& brokenWord)
 {
     std::vector<std::string> wordsFound;
     Generator<std::pair<Node*, std::string>> gen =  _trie.SearchPreMidSuffixesRoutine(_trie.GetRootRaw(), brokenWord[0], brokenWord[1], brokenWord[2]);
@@ -245,26 +245,26 @@ bool Operation::checkWordValidity(const std::string& userWord, const std::vector
         }
     }
     if (std::find(wordsFound.begin(), wordsFound.end(), userWord) != wordsFound.end()) {
-        return true;
+        return std::make_pair(true, wordsFound);
     }
-    return false;
+    return std::make_pair(false, wordsFound);
 }
+ 
 
-
-std::string Operation::fullWord(const std::vector<std::string>& brokenWord)
-{
-    Generator<std::pair<Node*, std::string>> gen =  _trie.SearchPreMidSuffixesRoutine(_trie.GetRootRaw(), brokenWord[0], brokenWord[1], brokenWord[2]);
-    while (gen.next())
-    {
-        std::pair<Node*, std::string> values = gen.getValue();
-        Node* nodePtr = values.first;
-        std::string word = values.second;
-        if (nodePtr != nullptr && nodePtr->is_word()) { 
-            return word;                            
-        }
-    }
-    return "";
-}
+// std::string Operation::fullWord(const std::vector<std::string>& brokenWord)
+// {
+//     Generator<std::pair<Node*, std::string>> gen =  _trie.SearchPreMidSuffixesRoutine(_trie.GetRootRaw(), brokenWord[0], brokenWord[1], brokenWord[2]);
+//     while (gen.next())
+//     {
+//         std::pair<Node*, std::string> values = gen.getValue();
+//         Node* nodePtr = values.first;
+//         std::string word = values.second;
+//         if (nodePtr != nullptr && nodePtr->is_word()) { 
+//             return word;                            
+//         }
+//     }
+//     return "";
+// }
 
 
 

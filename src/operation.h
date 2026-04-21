@@ -37,8 +37,9 @@ public:
     std::vector<std::string> BreakWord(const std::string& word);
     std::vector<std::string> GenerateBrokenWord();
     void LoadDictionary(const std::string& filepath);
-    bool checkWordValidity(const std::string& userWord, const std::vector<std::string>& brokenWord);
+    std::pair<bool, std::vector<std::string>> checkWordValidity(const std::string& userWord, const std::vector<std::string>& brokenWord);
     std::string fullWord(const std::vector<std::string>& brokenWord);
+    std::random_device& GetRand() { return _gen; }   
 
 private:
     void WriteTrie(std::filesystem::path filePath, Trie& trie);
