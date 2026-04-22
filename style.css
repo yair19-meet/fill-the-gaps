@@ -332,6 +332,29 @@ body {
     background: var(--accent-hover);
 }
 
+/* About screen — Home button */
+.btn-about-home {
+    margin-top: 40px;
+    background: #18181b;
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 10px 28px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn-about-home:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    background: #2d2d30;
+}
+
 /* Gameplay Area */
 .game-header {
     width: 100%;
