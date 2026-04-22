@@ -599,17 +599,25 @@ body {
     z-index: 9;
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 
 .sidebar-overlay.active {
     opacity: 1;
+    pointer-events: all;
 }
 
 @media (max-width: 768px) {
-    /* ---- Layout ---- */
+
+    /* ---- Root layout fills the real visual viewport ---- */
+    body {
+        height: 100dvh;   /* dynamic viewport height — excludes browser chrome */
+        overflow: hidden;
+    }
+
     .app-layout {
         flex-direction: column;
-        position: relative;
+        height: 100dvh;
         overflow: hidden;
     }
 
@@ -618,20 +626,19 @@ body {
         position: fixed;
         left: 0;
         top: 0;
-        height: 100%;
+        height: 100dvh;
         width: min(280px, 80vw) !important;
         transform: translateX(-110%);
         transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         border-radius: 0 40px 40px 0;
         z-index: 10;
-        padding: 30px 20px;
+        padding: 24px 20px;
     }
 
     .sidebar.mobile-open {
         transform: translateX(0);
     }
 
-    /* Hide old collapse/expand toggle icons; replaced by hamburger */
     .toggle-btn {
         display: none;
     }
@@ -640,21 +647,20 @@ body {
     .mobile-topbar {
         display: flex;
         align-items: center;
-        justify-content: space-between;
         width: 100%;
-        padding: 14px 18px 0;
+        padding: 10px 16px 4px;
         background: var(--bg-color);
-        z-index: 8;
         flex-shrink: 0;
+        z-index: 8;
     }
 
     .mobile-menu-btn {
         background: var(--accent-main);
         border: none;
         color: white;
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -663,92 +669,127 @@ body {
         flex-shrink: 0;
     }
 
-    .mobile-menu-btn svg {
-        pointer-events: none;
-    }
-
-    /* ---- Main content ---- */
+    /* ---- Main content: fills remaining height, no scroll ---- */
     .main-content {
         flex: 1;
-        padding: 12px 16px 20px;
-        overflow-y: auto;
+        padding: 6px 16px 12px;
+        overflow: hidden;         /* no scrolling — everything must fit */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     /* ---- Title ---- */
     .main-title {
-        font-size: 2.2rem;
-        margin-bottom: 18px;
+        font-size: clamp(1.6rem, 6vw, 2.4rem);
+        margin-bottom: clamp(8px, 2vh, 20px);
     }
 
-    /* ---- Landing screen ---- */
+    /* ---- Screens container fills available space ---- */
+    .screens-container {
+        flex: 1;
+        width: 100%;
+        max-width: 100%;
+        padding-top: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .screen {
+        flex: 1;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    /* ---- Landing ---- */
     .subtitle {
-        font-size: 1.1rem;
-        margin-bottom: 24px;
+        font-size: clamp(0.95rem, 3.5vw, 1.2rem);
+        margin-bottom: clamp(16px, 4vh, 32px);
     }
 
-    /* ---- Game header (timer/score bar) ---- */
+    /* ---- Gameplay screen: distribute space vertically ---- */
+    #screen-gameplay {
+        justify-content: flex-start;
+    }
+
     .game-header {
-        padding: 10px 18px;
-        margin-bottom: 20px;
-        border-radius: 16px;
+        padding: clamp(8px, 2vw, 14px) clamp(14px, 4vw, 24px);
+        margin-bottom: clamp(8px, 2vh, 20px);
+        border-radius: 14px;
+        flex-shrink: 0;
+        width: 100%;
     }
 
     .timer-box, .score-box {
-        font-size: 1.2rem;
+        font-size: clamp(1rem, 4vw, 1.3rem);
+        gap: 6px;
     }
 
-    /* ---- Word circle — scale with viewport ---- */
-    .word-circle {
-        width: min(88vw, 360px);
-        height: min(64vw, 260px);
-    }
-
+    /* ---- Word circle: proportional oval, fills remaining space ---- */
     .game-board {
-        margin-bottom: 28px;
+        flex: 1;
+        margin-bottom: clamp(10px, 2.5vh, 28px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
     }
 
-    /* ---- Input area ---- */
+    .word-circle {
+        /* Keep the oval aspect ratio at all screen sizes */
+        width: clamp(240px, 88vw, 380px);
+        aspect-ratio: 7 / 5;    /* always an oval — no separate height needed */
+        height: auto;
+    }
+
+    /* ---- Input ---- */
     .input-area {
         max-width: 100%;
+        width: 100%;
+        flex-shrink: 0;
+    }
+
+    .pill-input-container {
+        padding: 10px 18px;
     }
 
     .word-input {
-        font-size: 1.2rem;
+        font-size: clamp(1rem, 4vw, 1.3rem);
     }
 
     .input-prefix {
-        font-size: 1.2rem;
+        font-size: clamp(1rem, 4vw, 1.3rem);
         margin-right: 10px;
     }
 
-    /* ---- Mobile submit button (visible on mobile) ---- */
+    /* ---- Mobile submit arrow button ---- */
     .mobile-submit-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 44px;
-        height: 44px;
-        min-width: 44px;
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
         background: white;
         border: none;
         border-radius: 50%;
         color: var(--accent-main);
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         cursor: pointer;
         margin-left: 8px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        transition: transform 0.15s ease;
     }
 
     .mobile-submit-btn:active {
-        transform: scale(0.92);
+        transform: scale(0.9);
     }
 
-    /* Pill container needs to accommodate the mobile submit btn */
     .pill-and-submit {
         display: flex;
         align-items: center;
-        gap: 0;
         width: 100%;
     }
 
@@ -758,43 +799,56 @@ body {
 
     /* ---- Feedback ---- */
     .feedback-message {
-        font-size: 1rem;
-        margin-top: 14px;
+        font-size: clamp(0.85rem, 3.5vw, 1rem);
+        margin-top: clamp(8px, 2vh, 16px);
+        height: auto;
+        min-height: 22px;
     }
 
-    /* ---- About text ---- */
+    /* ---- About ---- */
     .about-text {
-        font-size: 1rem !important;
+        font-size: clamp(0.85rem, 3.2vw, 1rem) !important;
         padding: 0 8px;
+        overflow-y: auto;
+        max-height: 100%;
     }
 
-    /* ---- Game over screen ---- */
+    /* ---- Game over ---- */
     .score-circle {
-        width: 120px;
-        height: 120px;
-        font-size: 3rem;
+        width: clamp(90px, 28vw, 130px);
+        height: clamp(90px, 28vw, 130px);
+        font-size: clamp(2rem, 8vw, 3.5rem);
+        margin: clamp(8px, 2vh, 16px) auto;
     }
 
     .final-score {
-        font-size: 1.2rem;
+        font-size: clamp(1rem, 4vw, 1.3rem);
+        margin: clamp(8px, 2vh, 20px) 0;
     }
 
     .gameover-actions {
         flex-direction: column;
         align-items: center;
         width: 100%;
+        gap: 10px;
+        margin-top: 8px;
     }
 
     .btn-primary {
         width: 100%;
-        max-width: 320px;
-        font-size: 1.1rem;
-        padding: 14px 30px;
+        max-width: 300px;
+        font-size: clamp(0.95rem, 4vw, 1.1rem);
+        padding: 13px 24px;
     }
 
-    /* ---- Summary ---- */
     .summary-container {
         max-width: 100%;
+        padding: 14px;
+        margin-bottom: 12px;
+    }
+
+    .summary-list {
+        max-height: 100px;
     }
 
     /* Sidebar overlay */
@@ -803,19 +857,3 @@ body {
     }
 }
 
-/* Even smaller screens (e.g. iPhone SE 375px) */
-@media (max-width: 400px) {
-    .main-title {
-        font-size: 1.8rem;
-        margin-bottom: 12px;
-    }
-
-    .word-circle {
-        width: 92vw;
-        height: 66vw;
-    }
-
-    .game-header {
-        padding: 8px 12px;
-    }
-}
