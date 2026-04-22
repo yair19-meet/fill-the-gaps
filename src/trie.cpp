@@ -9,7 +9,7 @@
 #include <random>
 #include <thread>
 
-#include <winsock2.h>
+ 
 
 #include "generation.h"
 

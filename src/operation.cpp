@@ -21,7 +21,7 @@
 #include <thread>
 #include <unordered_set>
 
-#include <winsock2.h> 
+ 
 
 #include "generation.h"
 #include "trie.h"
