@@ -52,6 +52,10 @@ navAbout.addEventListener('click', () => {
     showScreen(screenAbout);
     clearInterval(timerInterval);
 });
+const btnAboutHome = document.getElementById('btn-about-home');
+btnAboutHome.addEventListener('click', () => {
+    showScreen(screenLanding);
+});
 mainTitle.addEventListener('click', () => {
     showScreen(screenLanding);
     clearInterval(timerInterval);
