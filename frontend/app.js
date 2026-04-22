@@ -3,11 +3,17 @@ let score = 0;
 let timeLeft = 120;
 let timerInterval = null;
 let currentBrokenWord = [];
+let correctWords = [];
+
+// Wasm State
+let gameEngine;
+let WasmModule;
 
 // Screens
 const screenLanding = document.getElementById('screen-landing');
 const screenGameplay = document.getElementById('screen-gameplay');
 const screenGameOver = document.getElementById('screen-gameover');
+const screenAbout = document.getElementById('screen-about');
 
 // Elements
 const btnStart = document.getElementById('btn-start');
@@ -21,36 +27,76 @@ const wordInput = document.getElementById('word-input');
 const feedbackMessage = document.getElementById('feedback-message');
 const sidebarToggle = document.getElementById('sidebar-toggle');
 const sidebar = document.getElementById('sidebar');
-const themeCheckboxes = document.querySelectorAll('input[name="theme"]');
+const sidebarWords = document.getElementById('sidebar-words');
+const navAbout = document.getElementById('nav-about');
+const mainTitle = document.querySelector('.main-title');
+const btnSummary = document.getElementById('btn-summary');
+const summaryContainer = document.getElementById('summary-container');
+const summaryList = document.getElementById('summary-list');
 
 // Event Listeners
 btnStart.addEventListener('click', startGame);
 btnRestart.addEventListener('click', startGame);
 guessForm.addEventListener('submit', handleGuess);
-
-// Sidebar Toggle
+btnSummary.addEventListener('click', toggleSummary);
 sidebarToggle.addEventListener('click', () => {
     sidebar.classList.toggle('collapsed');
 });
+navAbout.addEventListener('click', () => {
+    showScreen(screenAbout);
+    clearInterval(timerInterval);
+});
+mainTitle.addEventListener('click', () => {
+    showScreen(screenLanding);
+    clearInterval(timerInterval);
+});
+mainTitle.style.cursor = 'pointer';
+
+// Initialize Wasm Module
+async function initWasm() {
+    try {
+        WasmModule = await createGameModule();
+        gameEngine = new WasmModule.Operation();
+        
+        // Emscripten's virtual filesystem has the preloaded data/ folder
+        gameEngine.LoadDictionary("data/dictionary_rich.txt");
+        
+        // Hide loading overlay
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.opacity = '0';
+            setTimeout(() => loadingOverlay.remove(), 500);
+        }
+        console.log("Game Engine loaded successfully.");
+    } catch (err) {
+        console.error("Failed to initialize Wasm:", err);
+        const loadingText = document.querySelector('#loading-overlay p');
+        if (loadingText) loadingText.textContent = "Error loading game engine. Please refresh.";
+    }
+}
+
+initWasm();
+
+
 
 // Interactive Theme Selection
-themeCheckboxes.forEach(cb => {
-    cb.addEventListener('change', async () => {
-        const selectedThemes = Array.from(document.querySelectorAll('input[name="theme"]:checked')).map(cb => cb.value);
-        if (selectedThemes.length === 0) {
-            // Prevent unchecking all
-            cb.checked = true;
-            return;
-        }
-        // Immediately set themes on the backend
-        try {
-            const themesParam = selectedThemes.join(',');
-            await fetch(`/api/set_themes?themes=${themesParam}`);
-        } catch (err) {
-            console.error("Error setting themes dynamically:", err);
-        }
-    });
-});
+// themeCheckboxes.forEach(cb => {
+//     cb.addEventListener('change', async () => {
+//         const selectedThemes = Array.from(document.querySelectorAll('input[name="theme"]:checked')).map(cb => cb.value);
+//         if (selectedThemes.length === 0) {
+//             // Prevent unchecking all
+//             cb.checked = true;
+//             return;
+//         }
+//         // Immediately set themes on the backend
+//         try {
+//             const themesParam = selectedThemes.join(',');
+//             await fetch(`/api/set_themes?themes=${themesParam}`);
+//         } catch (err) {
+//             console.error("Error setting themes dynamically:", err);
+//         }
+//     });
+// });
 
 // Functions
 function showScreen(screenElement) {
@@ -59,22 +105,26 @@ function showScreen(screenElement) {
 }
 
 async function startGame(e) {
-    const selectedThemes = Array.from(document.querySelectorAll('input[name="theme"]:checked')).map(cb => cb.value);
-    if (selectedThemes.length === 0) {
-        alert('Please select at least one theme!');
-        return;
-    }
-
-    // Set themes on the backend
-    try {
-        const themesParam = selectedThemes.join(',');
-        await fetch(`/api/set_themes?themes=${themesParam}`);
-    } catch (err) {
-        console.error("Error setting themes:", err);
-    }
+    // const selectedThemes = Array.from(document.querySelectorAll('input[name="theme"]:checked')).map(cb => cb.value);
+    // if (selectedThemes.length === 0) {
+    //     alert('Please select at least one theme!');
+    //     return;
+    // }
+    // 
+    // // Set themes on the backend
+    // try {
+    //     const themesParam = selectedThemes.join(',');
+    //     await fetch(`/api/set_themes?themes=${themesParam}`);
+    // } catch (err) {
+    //     console.error("Error setting themes:", err);
+    // }
 
     score = 0;
     timeLeft = 120;
+    correctWords = [];
+    summaryContainer.style.display = 'none';
+    // Clear sidebar word list
+    sidebarWords.innerHTML = '<p class="sidebar-empty-msg">Words you guess correctly will appear here!</p>';
     updateScore();
     updateTimer();
 
@@ -98,11 +148,50 @@ async function startGame(e) {
 function endGame() {
     clearInterval(timerInterval);
     finalScoreDisplay.textContent = score;
+
+    // Prepare summary
+    summaryList.innerHTML = '';
+    if (correctWords.length === 0) {
+        summaryList.innerHTML = '<p style="color: var(--text-muted); font-style: italic;">No words yet. Try again!</p>';
+    } else {
+        correctWords.forEach(word => {
+            const span = document.createElement('span');
+            span.className = 'summary-word';
+            span.textContent = word;
+            summaryList.appendChild(span);
+        });
+    }
+
     showScreen(screenGameOver);
+}
+
+function toggleSummary() {
+    if (summaryContainer.style.display === 'none') {
+        summaryContainer.style.display = 'block';
+        btnSummary.textContent = 'HIDE SUMMARY';
+    } else {
+        summaryContainer.style.display = 'none';
+        btnSummary.textContent = 'SUMMARY';
+    }
 }
 
 function updateScore() {
     scoreDisplay.textContent = score;
+}
+
+function recordCorrectWord(word) {
+    // Single source of truth: update array and sidebar together
+    correctWords.push(word);
+
+    const emptyMsg = sidebarWords.querySelector('.sidebar-empty-msg');
+    if (emptyMsg) emptyMsg.remove();
+
+    const entry = document.createElement('div');
+    entry.className = 'sidebar-word-entry';
+    entry.innerHTML = `<span class="sidebar-word-check">✓</span><span class="sidebar-word-text">${word}</span>`;
+    sidebarWords.prepend(entry);
+
+    requestAnimationFrame(() => entry.classList.add('visible'));
 }
 
 function updateTimer() {
@@ -117,22 +206,37 @@ function updateTimer() {
 }
 
 async function fetchNextWord() {
+    if (!gameEngine) return [];
     try {
-        const res = await fetch('/api/generate');
-        const data = await res.json();
-        return data.brokenWord;
+        const brokenWordVector = gameEngine.GenerateBrokenWord();
+        // Convert Wasm StringVector to JS Array
+        const brokenWord = [];
+        for (let i = 0; i < brokenWordVector.size(); i++) {
+            brokenWord.push(brokenWordVector.get(i));
+        }
+        return brokenWord;
     } catch (err) {
-        console.error("Error fetching word:", err);
+        console.error("Error generating word:", err);
         return [];
     }
 }
 
 async function checkWordWithBackend(guess, brokenWord) {
+    if (!gameEngine) return { valid: false };
     try {
-        const brokenParam = brokenWord.join(',');
-        const res = await fetch(`/api/check?guess=${encodeURIComponent(guess)}&broken=${encodeURIComponent(brokenParam)}`);
-        const data = await res.json();
-        return data;
+        // Convert JS Array to Wasm StringVector
+        const brokenWordVector = new WasmModule.StringVector();
+        brokenWord.forEach(part => brokenWordVector.push_back(part));
+
+        const result = gameEngine.checkWordValidity(guess, brokenWordVector);
+        
+        // Cleanup vector to avoid memory leaks
+        brokenWordVector.delete();
+        
+        return {
+            valid: result.valid,
+            correctWord: result.correctWord
+        };
     } catch (err) {
         console.error("Error checking word:", err);
         return { valid: false };
@@ -144,7 +248,7 @@ async function nextWord() {
     if (currentBrokenWord && currentBrokenWord.length > 0) {
         renderWord(currentBrokenWord);
     } else {
-        wordDisplay.innerHTML = '<span class="text-orange" style="font-size: 1.5rem">Error loading word. Ensure C++ server is running.</span>';
+        wordDisplay.innerHTML = '<span class="text-orange" style="font-size: 1.5rem">Error loading word. Please refresh.</span>';
     }
     wordInput.value = '';
 }
@@ -155,6 +259,18 @@ function renderWord(brokenWordParts) {
     // We join them with '*' to insert the implicit gaps between the parts.
     const fullString = brokenWordParts.join('*');
     const chars = fullString.split('');
+
+    // Dynamically scale font size and gap for longer words to fit the 420px oval
+    let fontSize = 2.5; // default 2.5rem
+    let gap = 8;        // default 8px
+    if (chars.length > 9) {
+        const scaleFactor = 9 / chars.length;
+        // ensure it doesn't get too small
+        fontSize = Math.max(1.2, 2.5 * scaleFactor);
+        gap = Math.max(3, 8 * scaleFactor);
+    }
+    wordDisplay.style.fontSize = `${fontSize}rem`;
+    wordDisplay.style.gap = `${gap}px`;
 
     chars.forEach((char, index) => {
         const span = document.createElement('span');
@@ -193,6 +309,7 @@ async function handleGuess(e) {
         wordInput.disabled = false;
         wordInput.focus();
         score++;
+        recordCorrectWord(guess);
         updateScore();
         showFeedback(true);
         // Add a nice pop effect to the score

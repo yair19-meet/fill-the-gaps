@@ -10,45 +10,31 @@
 </head>
 
 <body>
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loader"></div>
+        <p>Loading Game Engine...</p>
+    </div>
+
     <div class="app-layout">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <button class="toggle-btn" id="sidebar-toggle" aria-label="Toggle Sidebar">
-                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-collapse"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon-expand"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round" class="icon-collapse">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"
+                    stroke-linecap="round" stroke-linejoin="round" class="icon-expand">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
             </button>
-            
+
             <div class="sidebar-content">
-                <h2 class="sidebar-title">Themes</h2>
-                <div class="theme-list">
-                    <label class="theme-item">
-                        <input type="checkbox" name="theme" value="politics" checked>
-                        <span class="custom-checkbox">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        </span>
-                        <span class="theme-name">Politics</span>
-                    </label>
-                    <label class="theme-item">
-                        <input type="checkbox" name="theme" value="history">
-                        <span class="custom-checkbox">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        </span>
-                        <span class="theme-name">History</span>
-                    </label>
-                    <label class="theme-item">
-                        <input type="checkbox" name="theme" value="food">
-                        <span class="custom-checkbox">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        </span>
-                        <span class="theme-name">Food</span>
-                    </label>
-                    <label class="theme-item">
-                        <input type="checkbox" name="theme" value="pop">
-                        <span class="custom-checkbox">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        </span>
-                        <span class="theme-name">Pop</span>
-                    </label>
+                <h2 class="sidebar-title">✓ Words</h2>
+                <div id="sidebar-words" class="sidebar-words">
+                    <p class="sidebar-empty-msg">Words you guess correctly will appear here!</p>
                 </div>
             </div>
         </aside>
@@ -56,12 +42,37 @@
         <!-- Main Content -->
         <main class="main-content">
             <h1 class="main-title">Fill The Gaps</h1>
-            
+
             <div class="screens-container" id="app-container">
+                <!-- About Screen -->
+                <section id="screen-about" class="screen">
+                    <div class="about-text"
+                        style="font-size: 1.25rem; line-height: 1.6; font-weight: 600; max-width: 650px; text-align: center;">
+                        <p style="margin-bottom: 10px;">Welcome!</p>
+                        <p style="margin-bottom: 10px;">In this Wild Card game you are presented with a sequence of
+                            letters separated by '*' characters.</p>
+                        <p style="margin-bottom: 10px;">Each '*' character means there is a gap of zero or more letters
+                            you need to identify.</p>
+                        <p style="margin-bottom: 10px;">Your job is to find a word that matches the pattern!</p>
+                        <p style="margin-bottom: 10px;">Just like a cryptography expert that knows how to crack codes,
+                            or a Machine Learning Algorithm that can detect patterns..</p>
+                        <p style="margin-bottom: 10px;">We test your problem solving skills, and your vocabulary
+                            knowledge! You have 2 minutes to fill as many gaps as possible!</p>
+                        <p style="margin-bottom: 10px;">Good luck!</p>
+                        <p style="margin-top: 30px; color: var(--text-main); font-weight: 400;">Game developed by Yair
+                            Tal</p>
+                    </div>
+                </section>
+
                 <!-- Landing Screen -->
                 <section id="screen-landing" class="screen active">
                     <p class="subtitle">Can you guess the word before time runs out?</p>
                     <button id="btn-start" class="btn-primary">START GAME</button>
+
+                    <button id="nav-about"
+                        style="margin-top: 20px; background: none; border: none; color: var(--text-main); font-family: inherit; font-size: 1.2rem; cursor: pointer; text-decoration: underline; opacity: 0.8;">
+                        About the Game
+                    </button>
                 </section>
 
                 <!-- Gameplay Screen -->
@@ -106,12 +117,22 @@
                         </div>
                         <p>points</p>
                     </div>
-                    <button id="btn-restart" class="btn-primary">PLAY AGAIN</button>
+                    
+                    <div id="summary-container" class="summary-container" style="display: none;">
+                        <h3 class="summary-title">Words you got right:</h3>
+                        <div id="summary-list" class="summary-list"></div>
+                    </div>
+
+                    <div class="gameover-actions">
+                        <button id="btn-summary" class="btn-primary btn-summary">SUMMARY</button>
+                        <button id="btn-restart" class="btn-primary">PLAY AGAIN</button>
+                    </div>
                 </section>
             </div>
         </main>
     </div>
 
+    <script src="game_engine.js"></script>
     <script src="app.js"></script>
 </body>
 

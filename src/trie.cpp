@@ -30,32 +30,7 @@ Node* Node::child(char c) const {
     return _children.at(c).get();
 }
 
-// unsigned short Node::GetLastAppearance() const
-// {
-//     if (_appearances.empty()) {
-//         throw std::runtime_error("No appearances available");
-//     }
-//     return _appearances.back();
-// }
 
-
-// void Node::Serialize(std::ofstream& stream)
-// {
-//     uint16_t size = htons(static_cast<uint16_t>(_appearances.size()));
-//     stream.write(reinterpret_cast<const char*>(&size), sizeof(size));
-
-//     for (auto& fileID : _appearances)
-//     {
-//        uint16_t fID = htons(fileID);
-//         stream.write(reinterpret_cast<const char*>(&fID), sizeof(fID));       
-//     }
-    
-//     for (char c : kAlphabet)
-//     {
-//         char flag = (child(c) == nullptr) ? 0 : 1;
-//         stream.write(&flag, sizeof(flag));
-//     }
-// }
 
 
 

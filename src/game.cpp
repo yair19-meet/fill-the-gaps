@@ -39,9 +39,11 @@ int main() {
     
     // We'll load the dictionary later when the frontend sets the theme
     // gameEngine->LoadDictionary("../data/politics_words_new.txt");
+    gameEngine->LoadDictionary("../data/dictionary_rich.txt");
 
     svr.set_mount_point("/", "../frontend");
 
+    /*
     svr.Get("/api/set_themes", [&](const httplib::Request& req, httplib::Response& res) {
         if (!req.has_param("themes")) {
             res.status = 400;
@@ -52,14 +54,15 @@ int main() {
         
         // Reset the engine to clear the trie
         gameEngine = std::make_unique<Operation>();
-        
+         
         if (themes.find("politics") != std::string::npos) {
-            gameEngine->LoadDictionary("../data/politics_words_new.txt");
+            gameEngine->LoadDictionary("../data/politics_words.txt");
         }
         
         res.set_content("{\"status\": \"ok\"}", "application/json");
         res.set_header("Access-Control-Allow-Origin", "*");
     });
+    */
 
     svr.Get("/api/generate", [&](const httplib::Request& req, httplib::Response& res) {
         std::vector<std::string> brokenWord = gameEngine->GenerateBrokenWord();

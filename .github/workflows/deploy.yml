@@ -1,0 +1,37 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Build WebAssembly
+        run: |
+          emcc src/operation.cpp src/trie.cpp src/generation.cpp src/wasm_wrapper.cpp \
+          -Isrc -O3 -std=c++20 \
+          -s WASM=1 \
+          -s MODULARIZE=1 \
+          -s EXPORT_NAME='createGameModule' \
+          -s ALLOW_MEMORY_GROWTH=1 \
+          --bind \
+          --preload-file data \
+          -o frontend/game_engine.js
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend
