@@ -1,4 +1,4 @@
-# fill-the-gaps
+# Fill The Gaps
 
 Fill the gaps is a high-performance word-pattern game that tests your vocabulary and your ability to detect words with hidden gaps.
 During the game, the user has two minutes to discover as many words as he can.
@@ -28,4 +28,5 @@ While the game engine itself is written in C++, the frontend is written in HTML,
 The code is compiled to Web Assembly.
 
 
-The dataset is extracted from the public github repository dwyl.
+The dataset is extracted from the url: https://raw.githubusercontent.com/dwyl/english-words/master/words_alpha.txt
+This file is a plain text file containing 370,000 English words. From this file I extracted about 21,000 relevent words.
