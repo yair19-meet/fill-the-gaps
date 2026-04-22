@@ -34,6 +34,12 @@ const btnSummary = document.getElementById('btn-summary');
 const summaryContainer = document.getElementById('summary-container');
 const summaryList = document.getElementById('summary-list');
 
+// Mobile elements
+const mobileTopbar = document.getElementById('mobile-topbar');
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+const mobileSubmitBtn = document.getElementById('mobile-submit-btn');
+
 // Event Listeners
 btnStart.addEventListener('click', startGame);
 btnRestart.addEventListener('click', startGame);
@@ -51,6 +57,48 @@ mainTitle.addEventListener('click', () => {
     clearInterval(timerInterval);
 });
 mainTitle.style.cursor = 'pointer';
+
+// ---- Mobile helpers ----
+function isMobile() {
+    return window.innerWidth <= 768;
+}
+
+function openMobileSidebar() {
+    sidebar.classList.add('mobile-open');
+    sidebarOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMobileSidebar() {
+    sidebar.classList.remove('mobile-open');
+    sidebarOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function applyMobileLayout() {
+    if (isMobile()) {
+        mobileTopbar.style.display = 'flex';
+        mobileSubmitBtn.style.display = 'flex';
+    } else {
+        mobileTopbar.style.display = 'none';
+        mobileSubmitBtn.style.display = 'none';
+        closeMobileSidebar();
+    }
+}
+
+mobileMenuBtn.addEventListener('click', () => {
+    if (sidebar.classList.contains('mobile-open')) {
+        closeMobileSidebar();
+    } else {
+        openMobileSidebar();
+    }
+});
+
+sidebarOverlay.addEventListener('click', closeMobileSidebar);
+
+// Apply on load and on resize
+applyMobileLayout();
+window.addEventListener('resize', applyMobileLayout);
 
 // Initialize Wasm Module
 async function initWasm() {
@@ -130,7 +178,7 @@ async function startGame(e) {
 
     showScreen(screenGameplay);
     wordInput.value = '';
-    wordInput.focus();
+    if (!isMobile()) wordInput.focus();
 
     await nextWord();
 
@@ -251,6 +299,7 @@ async function nextWord() {
         wordDisplay.innerHTML = '<span class="text-orange" style="font-size: 1.5rem">Error loading word. Please refresh.</span>';
     }
     wordInput.value = '';
+    if (!isMobile()) wordInput.focus();
 }
 
 function renderWord(brokenWordParts) {

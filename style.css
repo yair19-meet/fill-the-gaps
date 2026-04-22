@@ -16,6 +16,11 @@
     --sidebar-collapsed-width: 80px;
 }
 
+/* Mobile-only elements — hidden by default on desktop */
+.mobile-topbar { display: none; }
+.mobile-submit-btn { display: none; }
+.pill-and-submit { display: contents; } /* pass-through wrapper on desktop */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -579,4 +584,238 @@ body {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-10px); }
     75% { transform: translateX(10px); }
+}
+
+/* ============================================================
+   MOBILE RESPONSIVE STYLES
+   ============================================================ */
+
+/* Sidebar overlay backdrop (mobile only) */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 9;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    /* ---- Layout ---- */
+    .app-layout {
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* ---- Sidebar becomes a slide-in drawer ---- */
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: min(280px, 80vw) !important;
+        transform: translateX(-110%);
+        transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        border-radius: 0 40px 40px 0;
+        z-index: 10;
+        padding: 30px 20px;
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    /* Hide old collapse/expand toggle icons; replaced by hamburger */
+    .toggle-btn {
+        display: none;
+    }
+
+    /* ---- Mobile top bar ---- */
+    .mobile-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 14px 18px 0;
+        background: var(--bg-color);
+        z-index: 8;
+        flex-shrink: 0;
+    }
+
+    .mobile-menu-btn {
+        background: var(--accent-main);
+        border: none;
+        color: white;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(255, 115, 0, 0.3);
+        flex-shrink: 0;
+    }
+
+    .mobile-menu-btn svg {
+        pointer-events: none;
+    }
+
+    /* ---- Main content ---- */
+    .main-content {
+        flex: 1;
+        padding: 12px 16px 20px;
+        overflow-y: auto;
+    }
+
+    /* ---- Title ---- */
+    .main-title {
+        font-size: 2.2rem;
+        margin-bottom: 18px;
+    }
+
+    /* ---- Landing screen ---- */
+    .subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 24px;
+    }
+
+    /* ---- Game header (timer/score bar) ---- */
+    .game-header {
+        padding: 10px 18px;
+        margin-bottom: 20px;
+        border-radius: 16px;
+    }
+
+    .timer-box, .score-box {
+        font-size: 1.2rem;
+    }
+
+    /* ---- Word circle — scale with viewport ---- */
+    .word-circle {
+        width: min(88vw, 360px);
+        height: min(64vw, 260px);
+    }
+
+    .game-board {
+        margin-bottom: 28px;
+    }
+
+    /* ---- Input area ---- */
+    .input-area {
+        max-width: 100%;
+    }
+
+    .word-input {
+        font-size: 1.2rem;
+    }
+
+    .input-prefix {
+        font-size: 1.2rem;
+        margin-right: 10px;
+    }
+
+    /* ---- Mobile submit button (visible on mobile) ---- */
+    .mobile-submit-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        background: white;
+        border: none;
+        border-radius: 50%;
+        color: var(--accent-main);
+        font-size: 1.4rem;
+        cursor: pointer;
+        margin-left: 8px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .mobile-submit-btn:active {
+        transform: scale(0.92);
+    }
+
+    /* Pill container needs to accommodate the mobile submit btn */
+    .pill-and-submit {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        width: 100%;
+    }
+
+    .pill-and-submit .pill-input-container {
+        flex: 1;
+    }
+
+    /* ---- Feedback ---- */
+    .feedback-message {
+        font-size: 1rem;
+        margin-top: 14px;
+    }
+
+    /* ---- About text ---- */
+    .about-text {
+        font-size: 1rem !important;
+        padding: 0 8px;
+    }
+
+    /* ---- Game over screen ---- */
+    .score-circle {
+        width: 120px;
+        height: 120px;
+        font-size: 3rem;
+    }
+
+    .final-score {
+        font-size: 1.2rem;
+    }
+
+    .gameover-actions {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .btn-primary {
+        width: 100%;
+        max-width: 320px;
+        font-size: 1.1rem;
+        padding: 14px 30px;
+    }
+
+    /* ---- Summary ---- */
+    .summary-container {
+        max-width: 100%;
+    }
+
+    /* Sidebar overlay */
+    .sidebar-overlay {
+        display: block;
+    }
+}
+
+/* Even smaller screens (e.g. iPhone SE 375px) */
+@media (max-width: 400px) {
+    .main-title {
+        font-size: 1.8rem;
+        margin-bottom: 12px;
+    }
+
+    .word-circle {
+        width: 92vw;
+        height: 66vw;
+    }
+
+    .game-header {
+        padding: 8px 12px;
+    }
 }

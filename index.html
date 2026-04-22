@@ -15,6 +15,9 @@
         <p>Loading Game Engine...</p>
     </div>
 
+    <!-- Sidebar overlay backdrop (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
     <div class="app-layout">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -38,6 +41,17 @@
                 </div>
             </div>
         </aside>
+
+        <!-- Mobile Top Bar (hidden on desktop via CSS) -->
+        <div class="mobile-topbar" id="mobile-topbar" style="display:none;">
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Open Words Sidebar">
+                <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+        </div>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -96,11 +110,13 @@
 
                     <div class="input-area">
                         <form id="guess-form" autocomplete="off">
-                            <div class="pill-input-container">
-                                <span class="input-prefix">&gt;</span>
-                                <input type="text" id="word-input" class="word-input" placeholder="...." autofocus>
+                            <div class="pill-and-submit">
+                                <div class="pill-input-container">
+                                    <span class="input-prefix">&gt;</span>
+                                    <input type="text" id="word-input" class="word-input" placeholder="...." autofocus autocorrect="off" autocapitalize="none" spellcheck="false">
+                                </div>
+                                <button type="submit" class="mobile-submit-btn" id="mobile-submit-btn" aria-label="Submit guess" style="display:none;">&#x2192;</button>
                             </div>
-                            <button type="submit" class="hidden-submit" style="display: none;">Submit</button>
                         </form>
                     </div>
 
